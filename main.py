@@ -13,7 +13,7 @@ def quit_bottun_callback():
     app.quit()
 
 
-Form = uic.loadUiType(os.path.join(os.getcwd(), "form.ui"))[0]
+Form = uic.loadUiType(os.path.join(os.getcwd(), "form2.ui"))[0]
 
 
 class IntroWindow(QMainWindow, Form):
