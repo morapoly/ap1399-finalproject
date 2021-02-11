@@ -1,6 +1,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+
 # from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtPrintSupport import *
 import sys, sqlite3, time
@@ -43,8 +44,11 @@ class StartDialog(QDialog):
     def login(self):
         passdlg = Login()
         if passdlg.exec_() == QDialog.Accepted:
+            name = passdlg.name
             self.close()
             self.window = MainWindow()
+            self.window.init(name)
+            self.window.set_name(name)
             self.window.show()
             self.window.loaddata()
         # sys.exit(app.exec_())
@@ -52,8 +56,11 @@ class StartDialog(QDialog):
     def login2(self):
         passdlg = Login()
         if passdlg.exec_() == QDialog.Accepted:
+            name = passdlg.name
             self.close()
             self.window = MainWindow2()
+            self.window.init(name)
+            self.window.set_name(name)
             self.window.show()
             self.window.loaddata()
 
@@ -62,6 +69,8 @@ class InsertDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(InsertDialog, self).__init__(*args, **kwargs)
 
+    def init(self, _name):
+        self.name = _name
         self.QBtn = QPushButton()
         self.QBtn.setText("Register")
 
@@ -70,7 +79,6 @@ class InsertDialog(QDialog):
         self.setFixedHeight(300)
 
         self.QBtn.clicked.connect(self.check_empty)
-        # self.QBtn.clicked.connect(self.addpatient)
 
         layout = QVBoxLayout()
 
@@ -178,9 +186,11 @@ class InsertDialog(QDialog):
             self.conn = sqlite3.connect("database.db")
             self.c = self.conn.cursor()
             self.c.execute(
-                # "INSERT INTO students (name,branch,sem,Mobile,address) VALUES (?,?,?,?,?)",
+                # "INSERT INTO patients (name,branch,sem,Mobile,address) VALUES (?,?,?,?,?)",
                 # (name, branch, sem, mobile, address),
-                "INSERT INTO students (name,id,branch,sem,day,month,Mobile,address) VALUES (?,?,?,?,?,?,?,?)",
+                "INSERT INTO "
+                + str(self.name)
+                + " (name,id,branch,sem,day,month,Mobile,address) VALUES (?,?,?,?,?,?,?,?)",
                 (name, idno, branch, sem, day, month, mobile, address),
             )
             self.conn.commit()
@@ -202,6 +212,8 @@ class InsertDialog2(QDialog):
     def __init__(self, *args, **kwargs):
         super(InsertDialog2, self).__init__(*args, **kwargs)
 
+    def init(self, _name):
+        self.name = _name
         self.QBtn = QPushButton()
         self.QBtn.setText("Register")
 
@@ -210,7 +222,6 @@ class InsertDialog2(QDialog):
         self.setFixedHeight(300)
 
         self.QBtn.clicked.connect(self.check_empty)
-        # self.QBtn.clicked.connect(self.addpatient)
 
         layout = QVBoxLayout()
 
@@ -225,19 +236,19 @@ class InsertDialog2(QDialog):
         layout.addWidget(self.idinput)
 
         self.branchinput = QComboBox()
-        self.branchinput.addItem("General Diagnostics Radiology")
-        self.branchinput.addItem("Computed Tomography (CT or Cat Scan)")
+        self.branchinput.addItem("Complete exams, x-rays, and dental cleanings")
+        self.branchinput.addItem("Fillings, root canals, and extractions")
         self.branchinput.addItem(
-            "Ultrasound (sonography)"
+            "Cosmetic dentistry, such as whitening, porcelain and composite veneers"
         )
-        self.branchinput.addItem("Nuclear Medicine")
-        self.branchinput.addItem("PET/CT")
-        self.branchinput.addItem("Magnetic Resonance Imaging (MRI)")
-        self.branchinput.addItem("Bone Densitometry")
+        self.branchinput.addItem("Implants - placement and restoration")
+        self.branchinput.addItem("Crowns, bridges, full and partial dentures")
+        self.branchinput.addItem("Orthodontics")
+        self.branchinput.addItem("Oral appliances for control of sleep apnea")
         self.branchinput.addItem(
-            "Digital and Analog Mammography"
+            "Preventive care, periodontal therapy, and nutritional counseling"
         )
-        self.branchinput.addItem("Apex Radiology Services.")
+        self.branchinput.addItem("Relaxation techniques using nitrous oxide sedation")
         layout.addWidget(self.branchinput)
 
         self.seminput = QComboBox()
@@ -318,9 +329,11 @@ class InsertDialog2(QDialog):
             self.conn = sqlite3.connect("database2.db")
             self.c = self.conn.cursor()
             self.c.execute(
-                # "INSERT INTO students (name,branch,sem,Mobile,address) VALUES (?,?,?,?,?)",
+                # "INSERT INTO patients (name,branch,sem,Mobile,address) VALUES (?,?,?,?,?)",
                 # (name, branch, sem, mobile, address),
-                "INSERT INTO students (name,id,branch,sem,day,month,Mobile,address) VALUES (?,?,?,?,?,?,?,?)",
+                "INSERT INTO "
+                + str(self.name)
+                + " (name,id,branch,sem,day,month,Mobile,address) VALUES (?,?,?,?,?,?,?,?)",
                 (name, idno, branch, sem, day, month, mobile, address),
             )
             self.conn.commit()
@@ -342,6 +355,8 @@ class SearchDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(SearchDialog, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.QBtn = QPushButton()
         self.QBtn.setText("Search")
 
@@ -365,7 +380,9 @@ class SearchDialog(QDialog):
         try:
             self.conn = sqlite3.connect("database.db")
             self.c = self.conn.cursor()
-            result = self.c.execute("SELECT * from students WHERE id=" + str(searchid))
+            result = self.c.execute(
+                "SELECT * from " + str(self.name) + " WHERE id=" + str(searchid)
+            )
             # row = result.fetchone()
             rows = result.fetchall()
             searchresult = (
@@ -398,6 +415,7 @@ class SearchDialog(QDialog):
             )
             # QMessageBox.information(QMessageBox(), "Successful", searchresult)
             dlg = SearchInformationDialog()
+            dlg.init(self.name)
             dlg.add(searchresult, searchid)
             dlg.exec_()
             self.conn.commit()
@@ -413,6 +431,8 @@ class SearchDialog2(QDialog):
     def __init__(self, *args, **kwargs):
         super(SearchDialog2, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.QBtn = QPushButton()
         self.QBtn.setText("Search")
 
@@ -436,7 +456,9 @@ class SearchDialog2(QDialog):
         try:
             self.conn = sqlite3.connect("database2.db")
             self.c = self.conn.cursor()
-            result = self.c.execute("SELECT * from students WHERE id=" + str(searchid))
+            result = self.c.execute(
+                "SELECT * from " + str(self.name) + " WHERE id=" + str(searchid)
+            )
             # row = result.fetchone()
             rows = result.fetchall()
             searchresult = (
@@ -469,6 +491,7 @@ class SearchDialog2(QDialog):
             )
             # QMessageBox.information(QMessageBox(), "Successful", searchresult)
             dlg = SearchInformationDialog2()
+            dlg.init(self.name)
             dlg.add(searchresult, searchid)
             dlg.exec_()
             self.conn.commit()
@@ -484,6 +507,8 @@ class SearchInformationDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(SearchInformationDialog, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.setWindowTitle("Successful")
         # self.searchresult = ""
         # self.rows = None
@@ -504,6 +529,7 @@ class SearchInformationDialog(QDialog):
 
     def patientinforamtion(self):
         dlg = SearchMoreInformationDialog()
+        dlg.init(self.name)
         dlg.loaddata(self.searchid)
         dlg.exec_()
 
@@ -517,6 +543,8 @@ class SearchInformationDialog2(QDialog):
     def __init__(self, *args, **kwargs):
         super(SearchInformationDialog2, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.setWindowTitle("Successful")
         # self.searchresult = ""
         # self.rows = None
@@ -537,6 +565,7 @@ class SearchInformationDialog2(QDialog):
 
     def patientinforamtion(self):
         dlg = SearchMoreInformationDialog2()
+        dlg.init(self.name)
         dlg.loaddata(self.searchid)
         dlg.exec_()
 
@@ -550,6 +579,8 @@ class SearchMoreInformationDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(SearchMoreInformationDialog, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.setWindowTitle("More Information!")
 
         self.tableWidget = QTableWidget()
@@ -585,7 +616,7 @@ class SearchMoreInformationDialog(QDialog):
     def loaddata(self, searchid):
         self.setWindowTitle("More Information about ID No: " + str(searchid))
         self.connection = sqlite3.connect("database.db")
-        query = "SELECT * from students WHERE id=" + str(searchid)
+        query = "SELECT * from " + str(self.name) + " WHERE id=" + str(searchid)
         result = self.connection.execute(query)
         self.tableWidget.setRowCount(0)
         for row_number, row_data in enumerate(result):
@@ -601,6 +632,8 @@ class SearchMoreInformationDialog2(QDialog):
     def __init__(self, *args, **kwargs):
         super(SearchMoreInformationDialog2, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.setWindowTitle("More Information!")
 
         self.tableWidget = QTableWidget()
@@ -636,7 +669,7 @@ class SearchMoreInformationDialog2(QDialog):
     def loaddata(self, searchid):
         self.setWindowTitle("More Information about ID No: " + str(searchid))
         self.connection = sqlite3.connect("database2.db")
-        query = "SELECT * from students WHERE id=" + str(searchid)
+        query = "SELECT * from " + str(self.name) + " WHERE id=" + str(searchid)
         result = self.connection.execute(query)
         self.tableWidget.setRowCount(0)
         for row_number, row_data in enumerate(result):
@@ -652,6 +685,8 @@ class DeleteDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(DeleteDialog, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.QBtn = QPushButton()
         self.QBtn.setText("Delete")
         self.QBtn2 = QPushButton()
@@ -677,10 +712,23 @@ class DeleteDialog(QDialog):
 
         delrol = ""
         delrol = self.deleteinput.text()
-        try:
+        conn = sqlite3.connect("database.db")
+        c = conn.cursor()
+        result = c.execute("SELECT * from " + str(self.name))
+        rows = result.fetchall()
+
+        found = False
+        for roll in rows:
+            if str(roll[0]) == str(delrol):
+                found = True
+
+        if found:
             self.conn = sqlite3.connect("database.db")
             self.c = self.conn.cursor()
-            self.c.execute("DELETE from students WHERE roll=" + str(delrol))
+            self.c.execute(
+                "DELETE from " + str(self.name) + " WHERE roll=" + str(delrol)
+            )
+
             self.conn.commit()
             self.c.close()
             self.conn.close()
@@ -688,7 +736,7 @@ class DeleteDialog(QDialog):
                 QMessageBox(), "Successful", "Deleted From Table Successful"
             )
             self.close()
-        except Exception:
+        else:
             QMessageBox.warning(
                 QMessageBox(), "Error", "Could not Delete student from the database."
             )
@@ -702,7 +750,7 @@ class DeleteDialog(QDialog):
         """
         self.conn = sqlite3.connect("database.db")
         self.c = self.conn.cursor()
-        self.c.execute("DELETE FROM students")
+        self.c.execute("DELETE FROM " + str(self.name))
         self.conn.commit()
         self.c.close()
         self.conn.close()
@@ -716,6 +764,8 @@ class DeleteDialog2(QDialog):
     def __init__(self, *args, **kwargs):
         super(DeleteDialog2, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.QBtn = QPushButton()
         self.QBtn.setText("Delete")
         self.QBtn2 = QPushButton()
@@ -741,10 +791,23 @@ class DeleteDialog2(QDialog):
 
         delrol = ""
         delrol = self.deleteinput.text()
-        try:
+        conn = sqlite3.connect("database2.db")
+        c = conn.cursor()
+        result = c.execute("SELECT * from " + str(self.name))
+        rows = result.fetchall()
+
+        found = False
+        for roll in rows:
+            if str(roll[0]) == str(delrol):
+                found = True
+
+        if found:
             self.conn = sqlite3.connect("database2.db")
             self.c = self.conn.cursor()
-            self.c.execute("DELETE from students WHERE roll=" + str(delrol))
+            self.c.execute(
+                "DELETE from " + str(self.name) + " WHERE roll=" + str(delrol)
+            )
+
             self.conn.commit()
             self.c.close()
             self.conn.close()
@@ -752,7 +815,7 @@ class DeleteDialog2(QDialog):
                 QMessageBox(), "Successful", "Deleted From Table Successful"
             )
             self.close()
-        except Exception:
+        else:
             QMessageBox.warning(
                 QMessageBox(), "Error", "Could not Delete student from the database."
             )
@@ -766,7 +829,7 @@ class DeleteDialog2(QDialog):
         """
         self.conn = sqlite3.connect("database2.db")
         self.c = self.conn.cursor()
-        self.c.execute("DELETE FROM students")
+        self.c.execute("DELETE FROM " + str(self.name))
         self.conn.commit()
         self.c.close()
         self.conn.close()
@@ -816,16 +879,21 @@ class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.conn = sqlite3.connect("database.db")
         self.c = self.conn.cursor()
         self.c.execute(
-            "CREATE TABLE IF NOT EXISTS students(roll INTEGER PRIMARY KEY AUTOINCREMENT ,name TEXT,id TEXT,branch TEXT,sem INTEGER,day INTEGER,month TEXT,mobile INTEGER,address TEXT)"
+            "CREATE TABLE IF NOT EXISTS "
+            + str(self.name)
+            + "(roll INTEGER PRIMARY KEY AUTOINCREMENT ,name TEXT,id TEXT,branch TEXT,sem INTEGER,day INTEGER,month TEXT,mobile INTEGER,address TEXT)"
         )
         self.c.close()
 
         file_menu = self.menuBar().addMenu("&File")
 
         help_menu = self.menuBar().addMenu("&About")
+
         self.setWindowTitle("Patient Management System for Dental Clinic")
 
         self.setMinimumSize(1000, 600)
@@ -899,7 +967,7 @@ class MainWindow(QMainWindow):
 
     def loaddata(self):
         self.connection = sqlite3.connect("database.db")
-        query = "SELECT * FROM students"
+        query = "SELECT * FROM " + str(self.name)
         result = self.connection.execute(query)
         self.tableWidget.setRowCount(0)
         for row_number, row_data in enumerate(result):
@@ -923,41 +991,51 @@ class MainWindow(QMainWindow):
 
     def insert(self):
         dlg = InsertDialog()
+        dlg.init(self.name)
         dlg.exec_()
 
     def delete(self):
         dlg = DeleteDialog()
+        dlg.init(self.name)
         dlg.exec_()
 
     def search(self):
         dlg = SearchDialog()
+        dlg.init(self.name)
         dlg.exec_()
 
     def about(self):
         dlg = AboutDialog()
         dlg.exec_()
 
+    def set_name(self, name):
+        self.name = name
+        print(self.name)
+        self.setWindowTitle(
+            "Patient Management System for Dental Clinic for " + str(self.name)
+        )
+
 
 class MainWindow2(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow2, self).__init__(*args, **kwargs)
 
+    def init(self, name):
+        self.name = name
         self.conn = sqlite3.connect("database2.db")
         self.c = self.conn.cursor()
         self.c.execute(
-            "CREATE TABLE IF NOT EXISTS students("
-            "roll INTEGER PRIMARY KEY AUTOINCREMENT ,"
-            "name TEXT,id TEXT,branch TEXT,"
-            "sem INTEGER,day INTEGER,month TEXT,"
-            "mobile INTEGER,"
-            "address TEXT)"
+            "CREATE TABLE IF NOT EXISTS "
+            + str(self.name)
+            + "(roll INTEGER PRIMARY KEY AUTOINCREMENT ,name TEXT,id TEXT,branch TEXT,sem INTEGER,day INTEGER,month TEXT,mobile INTEGER,address TEXT)"
         )
         self.c.close()
 
         file_menu = self.menuBar().addMenu("&File")
 
         help_menu = self.menuBar().addMenu("&About")
-        self.setWindowTitle("Patient Management System for Radiology Clinic")
+
+        self.setWindowTitle("Patient Management System for Dental Clinic")
 
         self.setMinimumSize(1000, 600)
 
@@ -1030,7 +1108,7 @@ class MainWindow2(QMainWindow):
 
     def loaddata(self):
         self.connection = sqlite3.connect("database2.db")
-        query = "SELECT * FROM students"
+        query = "SELECT * FROM " + str(self.name)
         result = self.connection.execute(query)
         self.tableWidget.setRowCount(0)
         for row_number, row_data in enumerate(result):
@@ -1054,30 +1132,32 @@ class MainWindow2(QMainWindow):
 
     def insert(self):
         dlg = InsertDialog2()
+        dlg.init(self.name)
         dlg.exec_()
 
     def delete(self):
         dlg = DeleteDialog2()
+        dlg.init(self.name)
         dlg.exec_()
 
     def search(self):
         dlg = SearchDialog2()
+        dlg.init(self.name)
         dlg.exec_()
 
     def about(self):
         dlg = AboutDialog()
         dlg.exec_()
 
+    def set_name(self, name):
+        self.name = name
+        print(self.name)
+        self.setWindowTitle(
+            "Patient Management System for Dental Clinic for " + str(self.name)
+        )
+
 
 app = QApplication(sys.argv)
-# window = StartDialog()
-# window.show()
 dlg = StartDialog()
 dlg.exec_()
 sys.exit(app.exec_())
-# passdlg = LoginDialog()
-# if passdlg.exec_() == QDialog.Accepted:
-#     window = MainWindow()
-#     window.show()
-#     window.loaddata()
-# sys.exit(app.exec_())
