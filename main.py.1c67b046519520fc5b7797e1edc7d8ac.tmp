@@ -170,20 +170,9 @@ class InsertDialog(QDialog):
 
     # check out emptyness of name
     def check_empty(self):
-        Hour, Day, Month = str(self.seminput.currentText()), str(self.dayinput.text()), str(self.monthinput.currentText())
-        conn = sqlite3.connect("database.db")
-        c = conn.cursor()
-        result = c.execute("SELECT * from " + str(self.name))
-        rows = result.fetchall()
-        reserv = False
-        for row in rows :
-            if row[4] == Hour and str(row[5]) == Day and row[6] == Month :
-                QMessageBox.warning(self, "Error", "This Time Is Reserved Before !")
-                reserv = True
-
         if self.nameinput.text() == "":
             QMessageBox.warning(self, "Error", "Empty name!")
-        elif not reserv :
+        else:
             # self.accept()
             self.addpatient()
 
@@ -324,20 +313,9 @@ class InsertDialog2(QDialog):
 
     # check out emptyness of name
     def check_empty(self):
-        Hour, Day, Month = str(self.seminput.currentText()), str(self.dayinput.text()), str(self.monthinput.currentText())
-        conn = sqlite3.connect("database2.db")
-        c = conn.cursor()
-        result = c.execute("SELECT * from " + str(self.name))
-        rows = result.fetchall()
-        reserv = False
-        for row in rows :
-            if row[4] == Hour and str(row[5]) == Day and row[6] == Month :
-                QMessageBox.warning(self, "Error", "This Time Is Reserved Before !")
-                reserv = True
-
         if self.nameinput.text() == "":
             QMessageBox.warning(self, "Error", "Empty name!")
-        elif not reserv :
+        else:
             # self.accept()
             self.addpatient()
 
